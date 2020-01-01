@@ -5,15 +5,23 @@
   <nav-bar class="home-nav"><div slot="center">购物街</div></nav-bar>
    <home-swiper :banners="banners"></home-swiper>
   <recommend-view :recommends='recommends'></recommend-view>
+  <feature-view></feature-view>
+  <tab-control :titles="['流行','精选','新款']"></tab-control>
 </div>
 </template>
 
 <script type="text/javascript">
 import NavBar from 'components/common/navbar/NavBar'
+//tab栏
+import TabControl from "components/content/tabControl/TabControl";
+
  //引入轮播图
 import HomeSwiper from "./childComps/HomeSwiper";
 //推荐栏
 import RecommendView from "./childComps/RecommendView";
+//本周流行
+import FeatureView from "./childComps/FeatureView";
+
 
 //封装好引用 这样就只用对该包里的函数处理就好
 import {getHomeMultidata} from 'network/home'
@@ -41,18 +49,30 @@ export default {
     })
   },
   components: {
-    NavBar,
+
     HomeSwiper,
-    RecommendView
+    RecommendView,
+    FeatureView,
+    NavBar,
+    TabControl
 
   }
 }
 </script>
 
 <style scoped>
+#home{
+  padding-top: 44px;
+}
 .home-nav{
     /*设置背景颜色var(--color-tint)是在css文件里定义的变量  */
     background-color: var(--color-tint);
     color: #fff ;
+
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 9;
   }
 </style>
