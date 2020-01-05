@@ -3,126 +3,42 @@
 <div id='home'>
   <!--放入头部具体的插槽-->
   <nav-bar class="home-nav"><div slot="center">购物街</div></nav-bar>
-   <home-swiper :banners="banners"></home-swiper>
-  <recommend-view :recommends='recommends'></recommend-view>
-  <feature-view></feature-view>
+
+
+  <!--滚动内容-->
+  <scroll class="content"
+          ref="scroll"
+          :probe-type='3' @scroll='contentScroll'
+          :pull-up-load="true" @pullingUp='loadMore'>
+    <home-swiper :banners="banners"></home-swiper>
+    <recommend-view :recommends='recommends'></recommend-view>
+    <feature-view></feature-view>
     <!--class="tab-control" 定义实现吸顶效果-->
     <tab-control class="tab-control"
     :titles="['流行','新款','精选']"
     @tabClick='tabClick'></tab-control>
     <!--动态获取切换信息-->
     <goods-list :goods="showGoods"></goods-list>
+  </scroll>
 
-    <ul>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-    </ul>
+  <!--调用 监控点击回顶-->
+  <back-top @click.native="backClick" v-show="isShowBackTop"></back-top>
 
 </div>
 </template>
 
 <script type="text/javascript">
+
 import NavBar from 'components/common/navbar/NavBar'
 //tab栏
 import TabControl from "components/content/tabControl/TabControl";
+//商品组件
+import GoodsList from 'components/content/goods/GoodsList'
+//上拉滚动
+import Scroll from 'components/common/scroll/Scroll'
+//回顶图标
+import BackTop from 'components/content/backTop/BackTop'
+
 
  //引入轮播图
 import HomeSwiper from "./childComps/HomeSwiper";
@@ -130,8 +46,6 @@ import HomeSwiper from "./childComps/HomeSwiper";
 import RecommendView from "./childComps/RecommendView";
 //本周流行
 import FeatureView from "./childComps/FeatureView";
-//商品组件
-import GoodsList from 'components/content/goods/GoodsList'
 
 
 //封装好引用 这样就只用对该包里的函数处理就好
@@ -153,7 +67,10 @@ export default {
         'sell':{page: 0,list: []}
       },
       //设置默认的页面
-      currentType:'pop'
+      currentType:'pop',
+      //设置默认回顶图标不显示
+      isShowBackTop:false
+
 
     }
   },
@@ -192,9 +109,27 @@ export default {
           this.currentType='sell'
           break
       }
-
+    },
+    backClick(){
+      // console.log("dianji");
+      //传入 scrill的 scrollTo方法
+      this.$refs.scroll.scrollTo(0,0)
+    },
+    //自定义事件的方法 获取回顶的显示问题
+    //position.y 值>1000px时 显示  因为Y轴向下滚是负值这里转正
+    contentScroll(position){
+      // console.log(position);
+      this.isShowBackTop=(-position.y) >800
     },
 
+    loadMore(){
+      console.log("上拉加载");
+      //当前加载的谁 就是记录的谁 当前
+      this.getHomeGoods(this.currentType)
+      //从新计算所有课滚动的区域
+      // this.$refs.scroll.scroll.refresll()
+
+    },
 
 
     /**
@@ -221,6 +156,9 @@ export default {
         this.goods[type].list.push(...res.data.list)
         //添加完商品后 页面显示+1
         this.goods[type].page +=1
+
+        //当上拉加载更多完成后调用方法进行下一次加载
+        this.$refs.scroll.finishPullUp()
       })
     }
 
@@ -233,7 +171,9 @@ export default {
     FeatureView,
     NavBar,
     TabControl,
-    GoodsList
+    GoodsList,
+    Scroll,
+    BackTop
 
   }
 }
@@ -241,18 +181,21 @@ export default {
 
 <style scoped>
 #home{
-  padding-top: 44px;
+  /* padding-top: 44px; */
+  /** vh 代表视口 100代表100% */
+   height: 100vh;
+   position: relative;
 }
 .home-nav{
     /*设置背景颜色var(--color-tint)是在css文件里定义的变量  */
     background-color: var(--color-tint);
     color: #fff ;
 
-    position: fixed;
+    /* position: fixed;
     left: 0;
     right: 0;
     top: 0;
-    z-index: 9;
+    z-index: 9; */
   }
   .tab-control{
     /**position: sticky 吸顶效果实现  很多浏览器不支持这个属性
@@ -263,5 +206,22 @@ export default {
     /**吸顶 */
      z-index: 9;
 
+  }
+  /**滚动框样式 */
+  .content{
+    /* height: calc(100% - 93px);
+
+     overflow: hidden;
+     margin-top: 44px */
+
+    overflow: hidden;
+    position: absolute;
+    /**上面高度 */
+    top: 44px;
+    /**下面高度 */
+    bottom: 49px;
+
+    left: 0;
+    right: 0;
   }
 </style>
