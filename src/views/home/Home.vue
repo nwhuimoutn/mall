@@ -3,20 +3,29 @@
 <div id='home'>
   <!--放入头部具体的插槽-->
   <nav-bar class="home-nav"><div slot="center">购物街</div></nav-bar>
-
+  <!--多一份tab-control 为了实现 吸顶覆盖-->
+   <tab-control
+    :titles="['流行','新款','精选']"
+    @tabClick='tabClick'
+    ref="tabControl1"
+    class='tab-control'
+    v-show="isTabFixed"/>
 
   <!--滚动内容-->
   <scroll class="content"
           ref="scroll"
           :probe-type='3' @scroll='contentScroll'
           :pull-up-load="true" @pullingUp='loadMore'>
-    <home-swiper :banners="banners"></home-swiper>
-    <recommend-view :recommends='recommends'></recommend-view>
+          <!--@swiperImageLoad.once   .once是获取一次高度--->
+    <home-swiper :banners="banners"
+                 @swiperImageLoad='swiperImageLoad'/>
+    <recommend-view :recommends='recommends'/>
     <feature-view></feature-view>
-    <!--class="tab-control" 定义实现吸顶效果-->
-    <tab-control class="tab-control"
+    <!--class="tab-control" 定义原生浏览器实现吸顶效果-->
+    <tab-control
     :titles="['流行','新款','精选']"
-    @tabClick='tabClick'></tab-control>
+    @tabClick='tabClick'
+    ref="tabControl2"/>
     <!--动态获取切换信息-->
     <goods-list :goods="showGoods"></goods-list>
   </scroll>
@@ -70,7 +79,12 @@ export default {
       //设置默认的页面
       currentType:'pop',
       //设置默认回顶图标不显示
-      isShowBackTop:false
+      isShowBackTop:false,
+      //保存滚动到什么位置的值
+      tobOffsetTop:0,
+      //设定默认不吸顶
+      isTabFixed:false
+
     }
   },
   computed:{
@@ -92,16 +106,16 @@ export default {
 
   },
   mounted(){
+    //1.图片加载完成的时间监听
     //这个就相当于 deounce函数的返回值 可以后面跟延迟多少 200毫秒
     const refresh=debounce(this.$refs.scroll.refresh)
       //监听item中图片加载完成
     this.$bus.$on('itemImageLoad',()=>{
       //图片加载一次更新一次数据
       // this.$refs.scroll.refresh()
-      // console.log('-----------');
-
       refresh()
     })
+
 
   },
   methods:{
@@ -109,7 +123,6 @@ export default {
      * 事件监听方法
      */
     //
-
 
 
     tabClick(index){
@@ -126,6 +139,8 @@ export default {
           this.currentType='sell'
           break
       }
+      this.$refs.tabControl1.currentIndex=index;
+      this.$refs.tabControl2.currentIndex=index;
     },
     backClick(){
       // console.log("dianji");
@@ -135,8 +150,10 @@ export default {
     //自定义事件的方法 获取回顶的显示问题
     //position.y 值>1000px时 显示  因为Y轴向下滚是负值这里转正
     contentScroll(position){
-      // console.log(position);
+      //判断BackTop 什么时候显示
       this.isShowBackTop=(-position.y) >800
+      //决定tabControl是否吸顶(position:flix)
+      this.isTabFixed=(-position.y) >this.tobOffsetTop
     },
 
     loadMore(){
@@ -146,6 +163,14 @@ export default {
       // //从新计算所有可滚动的区域
       // this.$refs.scroll.scroll.refresh()
 
+    },
+
+    //获取用于吸顶的图片高度
+    swiperImageLoad(){
+      //.获取tabControl的offsetTop
+      //所有的组件都有一个属性$el:用于获取组件中的元素
+    this.tobOffsetTop=this.$refs.tabControl2.$el.offsetTop
+    console.log( this.$refs.tabControl2.$el.offsetTop);
     },
 
 
@@ -208,22 +233,23 @@ export default {
     background-color: var(--color-tint);
     color: #fff ;
 
+   /**在使用浏览器原生滚动时,为了让导航不跟随一起滚动 */
     /* position: fixed;
     left: 0;
     right: 0;
     top: 0;
     z-index: 9; */
   }
-  .tab-control{
+  /* .tab-control{ */
     /**position: sticky 吸顶效果实现  很多浏览器不支持这个属性
     移动端多数支持*/
-    position: sticky;
+    /* position: sticky; */
     /**吸顶停留的位置 */
-    top: 44px;
+    /* top: 44px;
     /**吸顶 */
-     z-index: 9;
+     /* z-index: 9; */
 
-  }
+  /* } */
   /**滚动框样式 */
   .content{
     /* height: calc(100% - 93px);
@@ -241,4 +267,11 @@ export default {
     left: 0;
     right: 0;
   }
+  /**设定 tab-control 停留的位置 */
+  .tab-control{
+    position: relative;
+    z-index: 9;
+  }
+
+
 </style>

@@ -31,7 +31,7 @@ export default {
     }
   },
   mounted(){
-    //获取wrapper对象
+    //1.获取wrapper对象
     this.scroll=new BScroll(this.$refs.wrapper,{
       //监听滚动位置
       probeType:this.probeType,
@@ -42,12 +42,13 @@ export default {
     })
     //回顶位置调用
     this.scroll.scrollTo(0,0)
-    //监听滚动位置
+    //2.监听滚动位置
     this.scroll.on('scroll',(position)=>{
       // console.log(position);
       //把数据传出去 谁调用谁自定义调用事件
       this.$emit('scroll',position)
     })
+    //3.监听滚动到底部
      this.scroll.on('pullingUp',()=> {
       // console.log('上拉加载');
       this.$emit('pullingUp')
