@@ -67,6 +67,8 @@ export default {
     },
     //图片加载更新方法
     refresh(){
+      // console.log("----1");
+
       this.scroll && this.scroll.refresh()
     }
   },

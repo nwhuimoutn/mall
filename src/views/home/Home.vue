@@ -51,6 +51,7 @@ import FeatureView from "./childComps/FeatureView";
 //封装好引用 这样就只用对该包里的函数处理就好
 import {getHomeMultidata} from 'network/home'
 import {getHomeGoods} from 'network/home'
+import {debounce} from 'common/uilts'
 
 
 export default {
@@ -70,8 +71,6 @@ export default {
       currentType:'pop',
       //设置默认回顶图标不显示
       isShowBackTop:false
-
-
     }
   },
   computed:{
@@ -93,12 +92,15 @@ export default {
 
   },
   mounted(){
+    //这个就相当于 deounce函数的返回值 可以后面跟延迟多少 200毫秒
+    const refresh=debounce(this.$refs.scroll.refresh)
       //监听item中图片加载完成
     this.$bus.$on('itemImageLoad',()=>{
       //图片加载一次更新一次数据
-      this.$refs.scroll.refresh()
-      console.log('-----------');
+      // this.$refs.scroll.refresh()
+      // console.log('-----------');
 
+      refresh()
     })
 
   },
@@ -107,6 +109,9 @@ export default {
      * 事件监听方法
      */
     //
+
+
+
     tabClick(index){
       console.log(index);
 
