@@ -53,15 +53,21 @@ export default {
       this.$emit('pullingUp')
     })
 
+
   },
   methods:{
     //把 scrollTo方法封装传出去
     scrollTo(x,y,time=300){
-      this.scroll.scrollTo(0,0,time)
+      //当都为true时  才会执行(防止页面加载时图片已经加载的报错)
+      this.scroll && this.scroll.scrollTo(x, y, time);
     },
     //上拉加载完后方法后的封装
     finishPullUp(){
       this.scroll.finishPullUp()
+    },
+    //图片加载更新方法
+    refresh(){
+      this.scroll && this.scroll.refresh()
     }
   },
   components: {

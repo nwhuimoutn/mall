@@ -1,7 +1,8 @@
 <template>
  <!--绑定图片位置-->
   <div class="goods-item">
-    <img :src="goodsItem.show.img" alt="">
+    <!--监听每一张图片加载 @load--->
+    <img :src="goodsItem.show.img" alt="" @load="imageLoad">
     <div class="goods-info">
       <!--商品描述-->
       <p>{{goodsItem.title}}</p>
@@ -30,7 +31,12 @@ export default {
 
     }
   },
-  components: {
+  methods: {
+    imageLoad(){
+      // console.log('imageLoad');
+      this.$bus.$emit("itemImageLoad")
+
+    }
   }
 }
 </script>

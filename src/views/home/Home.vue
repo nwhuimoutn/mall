@@ -84,10 +84,22 @@ export default {
     //1.调用methods里的  getHomeMultidata方法
     // 因为与methods里的方法名相同 使用this
     this.getHomeMultidata();
+
     //2.调用methods里的 请求数据
     this.getHomeGoods('pop')
     this.getHomeGoods('new')
     this.getHomeGoods('sell')
+
+
+  },
+  mounted(){
+      //监听item中图片加载完成
+    this.$bus.$on('itemImageLoad',()=>{
+      //图片加载一次更新一次数据
+      this.$refs.scroll.refresh()
+      console.log('-----------');
+
+    })
 
   },
   methods:{
@@ -126,8 +138,8 @@ export default {
       console.log("上拉加载");
       //当前加载的谁 就是记录的谁 当前
       this.getHomeGoods(this.currentType)
-      //从新计算所有课滚动的区域
-      // this.$refs.scroll.scroll.refresll()
+      // //从新计算所有可滚动的区域
+      // this.$refs.scroll.scroll.refresh()
 
     },
 

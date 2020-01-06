@@ -5,8 +5,8 @@ export function request(config){
     //1.创建axios的实例
    const instance=axios.create({
       //  baseURL:'http://123.207.32.32:8000',
-    baseURL: 'http://123.207.32.32:8000/api/w1',
-    // baseURL: 'http://106.54.54.237:8000/api/w1',
+    // baseURL: 'http://123.207.32.32:8000/api/w1',
+    baseURL: 'http://106.54.54.237:8000/api/w1',
        timeout:5000
    })
    //2.1 axios拦截器 请求use()传入两个参数有一个是配置信息
@@ -23,11 +23,11 @@ export function request(config){
    })
    //2.2 响应拦截  一样传2个参数 一个是数据一个是错误
    instance.interceptors.response.use(res=>{
-       console.log(res);
+      //  console.log(res);
        //返回data 真实开发就是需要data
        return res.data
    },err=>{
-       console.log(err);
+      //  console.log(err);
    })
    //3.发送网络请求
    return instance(config)
